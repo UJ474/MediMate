@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LANGUAGES } from '../i18n/translations';
 import { User, Stethoscope, LogOut, Phone } from 'lucide-react';
-import { GovSeal } from './common/GovSeal';
+import medimateLogo from '../assets/Medimate_logo2.png';
 
 interface HeaderProps {
   // Who is signed in, if anyone. Patients and doctors never share a header view.
@@ -72,7 +72,7 @@ export const Header: React.FC<HeaderProps> = ({ signedIn, onLogout, onBrandClick
       <header className="gov-masthead">
         <div className="nav-inner">
           <button className="brand-section" onClick={onBrandClick}>
-            <GovSeal size={58} />
+            <img src={medimateLogo} alt="MediMate" className="brand-logo-img" />
             <span className="brand-info">
               <span className="brand-ministry">
                 <span lang="hi">आयुष मंत्रालय</span> · Ministry of Ayush

@@ -6,151 +6,50 @@
   gap: 1.25rem;
 }
 
-/* ---------- Menu bar ---------- */
-.gov-menubar {
-  background: var(--color-primary-navy);
-  border-radius: var(--radius-sm);
-  overflow-x: auto;
-}
-
-.gov-menubar ul {
-  list-style: none;
+/* ---------- Hero + Login section ---------- */
+.landing-hero {
   display: flex;
-}
-
-.gov-menubar li + li {
-  border-inline-start: 1px solid rgba(255, 255, 255, 0.14);
-}
-
-.gov-menubar button {
-  background: none;
-  border: none;
-  color: #FFFFFF;
-  font-family: var(--font-sans);
-  font-size: 0.88rem;
-  font-weight: 600;
-  padding: 0.7rem 1.15rem;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.gov-menubar button:hover,
-.gov-menubar button:focus-visible {
-  background: var(--color-primary-mid);
-}
-
-/* ---------- What's New strip ---------- */
-.news-bar {
-  display: flex;
-  align-items: stretch;
+  flex-direction: column;
   background: #FFFFFF;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   overflow: hidden;
-  font-size: 0.85rem;
-}
-
-.news-label {
-  flex-shrink: 0;
-  background: var(--color-accent);
-  color: #FFFFFF;
-  font-weight: 700;
-  padding: 0.5rem 0.9rem;
-  display: flex;
-  align-items: center;
-}
-
-.news-window {
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-}
-
-.news-track {
-  display: flex;
-  gap: 3rem;
-  padding-inline-start: 1rem;
-  white-space: nowrap;
-  animation: news-scroll 40s linear infinite;
-}
-
-.news-bar:hover .news-track {
-  animation-play-state: paused;
-}
-
-.news-item::before {
-  content: '■';
-  color: var(--color-accent);
-  font-size: 0.55rem;
-  margin-inline-end: 0.5rem;
-  vertical-align: middle;
-}
-
-@keyframes news-scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .news-track {
-    animation: none;
-    white-space: normal;
-    flex-wrap: wrap;
-    gap: 0.25rem 2rem;
-    padding: 0.4rem 1rem;
-  }
-  .news-item[aria-hidden='true'] {
-    display: none;
-  }
-}
-
-/* ---------- Banner + sign-in ---------- */
-.home-top {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
-  gap: 1.25rem;
-  align-items: stretch;
 }
 
 .home-banner {
   position: relative;
   margin: 0;
-  background: #FFFFFF;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
 .home-banner img {
   width: 100%;
-  height: 300px;
+  height: 340px;
   object-fit: cover;
   display: block;
 }
 
 .home-banner figcaption {
-  padding: 1rem 1.25rem 1.25rem;
+  padding: 1.5rem 2rem 1rem;
   border-top: 4px solid var(--color-accent);
 }
 
 .home-banner h1 {
-  font-size: clamp(1.35rem, 2.4vw, 1.8rem);
+  font-size: clamp(1.5rem, 2.8vw, 2rem);
   color: var(--color-primary-navy);
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.5rem;
 }
 
 .home-banner p {
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--color-text-secondary);
   line-height: 1.6;
 }
 
 .home-banner-credit {
   position: absolute;
-  top: 276px;
+  top: 316px;
   inset-inline-end: 0.5rem;
   font-size: 0.62rem;
   color: #FFFFFF;
@@ -159,26 +58,35 @@
   text-decoration: none;
 }
 
-.signin-box {
-  background: #FFFFFF;
-  border: 1px solid var(--color-border);
-  border-top: 4px solid var(--color-primary-navy);
-  border-radius: var(--radius-sm);
-  padding: 1.25rem;
+/* ---------- Login section below hero ---------- */
+.landing-login-section {
+  padding: 2rem 2rem 1.5rem;
+  border-top: 1px solid var(--color-border);
+  background: linear-gradient(180deg, #F0F5FA 0%, #FFFFFF 100%);
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  align-items: center;
 }
 
-.signin-box h2 {
-  font-size: 1.2rem;
+.landing-login-section h2 {
+  font-size: 1.5rem;
   color: var(--color-primary-navy);
+  margin-bottom: 0.35rem;
+  text-align: center;
 }
 
-.signin-desc {
-  font-size: 0.85rem;
+.landing-login-desc {
+  font-size: 0.95rem;
   color: var(--color-text-secondary);
   line-height: 1.5;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.landing-login-lang-row {
+  margin-bottom: 1.5rem;
+  width: 100%;
+  max-width: 500px;
 }
 
 .signin-label {
@@ -187,29 +95,33 @@
   color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  margin-top: 0.25rem;
+  margin-bottom: 0.6rem;
+  display: block;
+  text-align: center;
 }
 
 .signin-langs {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.35rem;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.5rem;
 }
 
 .signin-langs button {
   border: 1px solid var(--color-border);
-  background: var(--color-surface-subtle);
-  border-radius: var(--radius-sm);
-  padding: 0.4rem 0.2rem;
+  background: #FFFFFF;
+  border-radius: 10px;
+  padding: 0.7rem 0.5rem;
   font-family: var(--font-sans);
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--color-text-primary);
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .signin-langs button:hover {
   border-color: var(--color-primary-mid);
+  background: var(--color-primary-pale);
 }
 
 .signin-langs button.selected {
@@ -218,63 +130,67 @@
   color: #FFFFFF;
 }
 
-.signin-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
+.landing-login-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.25rem;
   width: 100%;
-  padding: 0.8rem 0.9rem;
-  border: 1.5px solid var(--color-primary-navy);
-  border-radius: var(--radius-sm);
+  max-width: 420px;
+}
+
+.landing-login-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  aspect-ratio: 1 / 1;
+  padding: 1.5rem;
+  border: 2.5px solid var(--color-primary-navy);
+  border-radius: 18px;
   background: #FFFFFF;
   color: var(--color-primary-navy);
   font-family: var(--font-sans);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 700;
   cursor: pointer;
-  text-align: start;
+  text-align: center;
+  transition: all 0.25s ease;
 }
 
-.signin-btn span {
-  flex: 1;
-}
-
-.signin-btn:first-of-type {
-  margin-top: 0.5rem;
-}
-
-.signin-btn.primary {
+.landing-login-btn.primary {
   background: var(--color-primary-navy);
   color: #FFFFFF;
+  border-color: var(--color-primary-navy);
 }
 
-.signin-btn:hover {
+.landing-login-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(11, 36, 71, 0.18);
+}
+
+.landing-login-btn.primary:hover {
+  background: var(--color-primary-dark, #091d38);
+}
+
+.landing-login-btn:not(.primary):hover {
   background: var(--color-primary-pale);
 }
 
-.signin-btn.primary:hover {
-  background: var(--color-primary-dark);
-}
-
-[dir='rtl'] .signin-btn svg:last-child {
+[dir='rtl'] .landing-login-btn svg:last-child {
   transform: scaleX(-1);
 }
 
 .signin-foot {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--color-text-secondary);
   border-top: 1px solid var(--color-border);
-  padding-top: 0.6rem;
-  margin-top: auto;
+  padding-top: 0.75rem;
+  text-align: center;
 }
 
 /* ---------- Content panels ---------- */
-.home-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-  gap: 1.25rem;
-}
-
 .gov-panel {
   background: #FFFFFF;
   border: 1px solid var(--color-border);
@@ -328,47 +244,11 @@
   background: #F7F9FB;
 }
 
-.notice-list {
-  list-style: none;
-  padding: 0.5rem 1.25rem 1rem;
-}
-
-.notice-list li {
-  display: flex;
-  gap: 0.4rem;
-  padding: 0.6rem 0;
-  border-bottom: 1px dashed var(--color-border);
-  font-size: 0.88rem;
-  line-height: 1.5;
-}
-
-.notice-list li:last-child {
-  border-bottom: none;
-}
-
-.notice-list li svg {
-  flex-shrink: 0;
-  margin-top: 0.25rem;
-  color: var(--color-accent);
-}
-
-.new-tag {
-  font-style: normal;
-  font-size: 0.62rem;
-  font-weight: 800;
-  color: #FFFFFF;
-  background: #C62828;
-  padding: 0.05rem 0.3rem;
-  border-radius: 2px;
-  margin-inline-start: 0.4rem;
-  vertical-align: middle;
-}
-
 .service-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 0.9rem;
-  padding: 1.1rem 1.25rem 1.25rem;
+  padding: 1.25rem 1.25rem 1.25rem;
 }
 
 .service-tile {
@@ -376,7 +256,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 0.4rem;
+  gap: 1rem;
   padding: 1.1rem 0.75rem;
   background: #FFFFFF;
   border: 1px solid var(--color-border);
@@ -384,11 +264,14 @@
   border-radius: var(--radius-sm);
   font-family: var(--font-sans);
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .service-tile:hover {
   background: var(--color-primary-subtle);
   border-bottom-color: var(--color-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .service-icon {
@@ -480,9 +363,9 @@
   color: var(--color-text-secondary);
 }
 
+/* ---------- Responsive ---------- */
 @media (max-width: 960px) {
-  .home-top,
-  .home-grid {
+  .landing-login-buttons {
     grid-template-columns: 1fr;
   }
 }
@@ -494,11 +377,20 @@
   .home-banner-credit {
     top: 176px;
   }
+  .home-banner figcaption {
+    padding: 1rem 1.25rem;
+  }
+  .landing-login-section {
+    padding: 1.25rem;
+  }
+  .landing-login-section h2 {
+    font-size: 1.25rem;
+  }
+  .landing-login-btn {
+    font-size: 1rem;
+    padding: 0.9rem 1rem;
+  }
   .how-grid {
     grid-template-columns: 1fr;
-  }
-  .gov-menubar button {
-    padding: 0.6rem 0.8rem;
-    font-size: 0.82rem;
   }
 }

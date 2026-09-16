@@ -11,22 +11,11 @@ interface LandingProps {
   onChooseRole: (role: 'patient' | 'doctor') => void;
 }
 
-// Public home page, laid out like a government service portal: menu bar,
-// "What's New" strip, banner with sign-in box, then services, process,
-// notices and help sections.
+// Public home page — modern, clean layout with hero + login below it.
 export const Landing: React.FC<LandingProps> = ({ onChooseRole }) => {
   const { t, lang, setLang } = useLanguage();
 
   const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-  const menu = [
-    { id: 'top', label: t('menu.home') },
-    { id: 'about', label: t('menu.about') },
-    { id: 'services', label: t('menu.services') },
-    { id: 'how', label: t('menu.how') },
-    { id: 'notices', label: t('menu.notices') },
-    { id: 'help', label: t('menu.help') },
-  ];
 
   const challenges = [
     { problem: t('hero.p1'), solution: t('hero.s1') },
@@ -43,34 +32,10 @@ export const Landing: React.FC<LandingProps> = ({ onChooseRole }) => {
     { icon: <ShieldCheck size={26} />, title: t('svc.abha.t'), desc: t('svc.abha.d'), role: 'patient' },
   ];
 
-  const news = [t('landing.news1'), t('landing.news2'), t('landing.news3')];
-
   return (
     <div className="gov-home" id="top">
-      <nav className="gov-menubar" aria-label="Main menu">
-        <ul>
-          {menu.map((m) => (
-            <li key={m.id}>
-              <button onClick={() => scrollTo(m.id)}>{m.label}</button>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      <div className="news-bar">
-        <span className="news-label">{t('landing.whatsNew')}</span>
-        <div className="news-window">
-          <div className="news-track">
-            {[...news, ...news].map((item, i) => (
-              <span key={i} className="news-item" aria-hidden={i >= news.length}>
-                {item}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <section className="home-top">
+      {/* ─── Hero section with background image ─── */}
+      <section className="landing-hero">
         <figure className="home-banner">
           <img src="/waiting-hall.jpg" alt={t('hero.imageAlt')} />
           <figcaption>
@@ -87,79 +52,68 @@ export const Landing: React.FC<LandingProps> = ({ onChooseRole }) => {
           </a>
         </figure>
 
-        <aside className="signin-box" aria-labelledby="signin-title">
+        {/* ─── Login area directly below the hero image ─── */}
+        <div className="landing-login-section" aria-labelledby="signin-title">
           <h2 id="signin-title">{t('landing.signin')}</h2>
-          <p className="signin-desc">{t('landing.signinDesc')}</p>
+          <p className="landing-login-desc">{t('landing.signinDesc')}</p>
 
-          <div className="signin-label">{t('landing.language')}</div>
-          <div className="signin-langs">
-            {LANGUAGES.map((l) => (
-              <button
-                key={l.code}
-                className={lang === l.code ? 'selected' : ''}
-                onClick={() => setLang(l.code)}
-                lang={l.code}
-                aria-pressed={lang === l.code}
-              >
-                {l.native}
-              </button>
-            ))}
+          <div className="landing-login-lang-row">
+            <span className="signin-label">{t('landing.language')}</span>
+            <div className="signin-langs">
+              {LANGUAGES.map((l) => (
+                <button
+                  key={l.code}
+                  className={lang === l.code ? 'selected' : ''}
+                  onClick={() => setLang(l.code)}
+                  lang={l.code}
+                  aria-pressed={lang === l.code}
+                >
+                  {l.native}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <button className="signin-btn primary" onClick={() => onChooseRole('patient')}>
-            <User size={18} />
-            <span>{t('landing.patientLogin')}</span>
-            <ChevronRight size={18} />
-          </button>
-          <button className="signin-btn" onClick={() => onChooseRole('doctor')}>
-            <Stethoscope size={18} />
-            <span>{t('landing.doctorLogin')}</span>
-            <ChevronRight size={18} />
-          </button>
+          <div className="landing-login-buttons">
+            <button className="landing-login-btn primary" onClick={() => onChooseRole('patient')}>
+              <User size={40} />
+              <span>{t('landing.patientLogin')}</span>
+            </button>
+            <button className="landing-login-btn" onClick={() => onChooseRole('doctor')}>
+              <Stethoscope size={40} />
+              <span>{t('landing.doctorLogin')}</span>
+            </button>
+          </div>
+
           <p className="signin-foot">{t('landing.loginMethods')}</p>
-        </aside>
+        </div>
       </section>
 
-      <div className="home-grid">
-        <section id="about" className="gov-panel">
-          <h2 className="gov-panel-title">{t('landing.about.title')}</h2>
-          <div className="gov-panel-body">
-            <p>{t('hero.lead')}</p>
-            <table className="gov-table">
-              <thead>
-                <tr>
-                  <th>{t('landing.col.challenge')}</th>
-                  <th>{t('landing.col.solution')}</th>
+      {/* ─── About section ─── */}
+      <section id="about" className="gov-panel">
+        <h2 className="gov-panel-title">{t('landing.about.title')}</h2>
+        <div className="gov-panel-body">
+          <p>{t('hero.lead')}</p>
+          <table className="gov-table">
+            <thead>
+              <tr>
+                <th>{t('landing.col.challenge')}</th>
+                <th>{t('landing.col.solution')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {challenges.map((c, i) => (
+                <tr key={i}>
+                  <td>{c.problem}</td>
+                  <td>{c.solution}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {challenges.map((c, i) => (
-                  <tr key={i}>
-                    <td>{c.problem}</td>
-                    <td>{c.solution}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-        <section id="notices" className="gov-panel">
-          <h2 className="gov-panel-title">{t('landing.notices.title')}</h2>
-          <ul className="notice-list">
-            {[t('landing.news2'), t('landing.news1'), t('notice1'), t('notice2'), t('notice3')].map((n, i) => (
-              <li key={i}>
-                <ChevronRight size={14} />
-                <span>
-                  {n}
-                  {i < 2 && <em className="new-tag">NEW</em>}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      </div>
-
+      {/* ─── Services ─── */}
       <section id="services" className="gov-panel">
         <h2 className="gov-panel-title">{t('landing.services.title')}</h2>
         <div className="service-grid">
@@ -173,6 +127,7 @@ export const Landing: React.FC<LandingProps> = ({ onChooseRole }) => {
         </div>
       </section>
 
+      {/* ─── How it works ─── */}
       <section id="how" className="gov-panel">
         <h2 className="gov-panel-title">{t('landing.how.title')}</h2>
         <div className="how-grid">
@@ -195,6 +150,7 @@ export const Landing: React.FC<LandingProps> = ({ onChooseRole }) => {
         </div>
       </section>
 
+      {/* ─── Help / Contact ─── */}
       <section id="help" className="gov-panel">
         <h2 className="gov-panel-title">{t('landing.help.title')}</h2>
         <div className="help-grid">

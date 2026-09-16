@@ -221,6 +221,12 @@ body {
   font-family: var(--font-sans);
 }
 
+.brand-logo-img {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+}
+
 .brand-info {
   display: flex;
   flex-direction: column;
