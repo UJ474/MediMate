@@ -30,7 +30,6 @@ type Dict = Partial<Record<LangCode, string>>;
 // Bengali, Marathi, Kannada). English and Tamil live inline below.
 export interface LocaleBundle {
   ui: Record<string, string>;
-  questions: Record<string, { text: string; options?: string[] }>;
 }
 
 const LOCALE_BUNDLES: Partial<Record<LangCode, LocaleBundle>> = { hi, te, bn, mr, kn };
@@ -327,6 +326,10 @@ export const UI: Record<string, Dict> = {
   'interview.uploadPapers': { en: 'Upload Reports', ta: 'அறிக்கைகளைப் பதிவேற்றவும்' },
   'interview.finishWithoutUpload': { en: 'Finish Without Uploading', ta: 'பதிவேற்றாமல் முடிக்கவும்' },
 
+  'interview.height': { en: 'Height (cm)', ta: 'உயரம் (செ.மீ)' },
+  'interview.weight': { en: 'Weight (kg)', ta: 'எடை (கிலோ)' },
+  'interview.measureInvalid': { en: 'Please check the numbers — height should be 50–250 cm and weight 2–300 kg.', ta: 'எண்களைச் சரிபார்க்கவும் — உயரம் 50–250 செ.மீ, எடை 2–300 கிலோ இருக்க வேண்டும்.' },
+
   // Upload step
   'upload.badge': { en: 'Document Intelligence', ta: 'ஆவண நுண்ணறிவு' },
   'upload.heading': { en: 'Upload Diagnostic Reports & Prescriptions', ta: 'கண்டறிதல் அறிக்கைகள் & மருந்துச்சீட்டுகளைப் பதிவேற்றவும்' },
@@ -370,111 +373,4 @@ export function translate(key: string, lang: LangCode, vars?: Record<string, str
     }
   }
   return text;
-}
-
-// ---- Interview question bank translations ----
-// Keyed by question id (matches MOCK_INTERVIEW_SEQUENCE ids in data/questionBank.ts)
-export const QUESTION_I18N: Record<string, { text: Dict; options?: Partial<Record<LangCode, string[]>> }> = {
-  Q001: {
-    text: {
-      en: "Hi! I'm MediMate's AI health assistant. I'll ask you some questions to help your doctor understand your situation better. This usually takes about 5–7 minutes. What is your main health concern today?",
-      ta: 'வணக்கம்! நான் MediMate இன் AI சுகாதார உதவியாளர். உங்கள் மருத்துவர் உங்கள் நிலையைப் புரிந்துகொள்ள உதவும் சில கேள்விகளைக் கேட்பேன். இதற்கு சுமார் 5–7 நிமிடங்கள் ஆகும். இன்று உங்கள் முக்கிய சுகாதார பிரச்சனை என்ன?',
-    },
-  },
-  Q002: {
-    text: {
-      en: 'How long have you been experiencing this?',
-      ta: 'இதை எவ்வளவு காலமாக அனுபவிக்கிறீர்கள்?',
-    },
-    options: {
-      en: ['Just started today', 'A few days', 'Past 1–2 weeks', 'More than 2 weeks'],
-      ta: ['இன்று தான் தொடங்கியது', 'சில நாட்களாக', 'கடந்த 1–2 வாரங்களாக', '2 வாரங்களுக்கு மேல்'],
-    },
-  },
-  Q003: {
-    text: {
-      en: 'How severe would you rate this on a scale of 1 to 10?',
-      ta: 'இதை 1 முதல் 10 வரையிலான அளவில் எவ்வளவு தீவிரமாக மதிப்பிடுவீர்கள்?',
-    },
-  },
-  Q004: {
-    text: {
-      en: 'Have you noticed if anything makes it better or worse?',
-      ta: 'எது இதை சிறப்பாகவோ அல்லது மோசமாகவோ ஆக்குகிறது என்பதை கவனித்தீர்களா?',
-    },
-  },
-  Q005: {
-    text: {
-      en: 'Do you have any of these accompanying symptoms? (You may select more than one)',
-      ta: 'இந்த அறிகுறிகளில் ஏதேனும் உங்களுக்கு உள்ளதா? (ஒன்றுக்கு மேற்பட்டவற்றைத் தேர்ந்தெடுக்கலாம்)',
-    },
-    options: {
-      en: ['Fever', 'Fatigue / tiredness', 'Nausea or vomiting', 'Headache', 'Breathlessness', 'Swelling in legs', 'None of the above'],
-      ta: ['காய்ச்சல்', 'சோர்வு', 'குமட்டல் அல்லது வாந்தி', 'தலைவலி', 'மூச்சுத் திணறல்', 'கால்களில் வீக்கம்', 'மேற்கண்டவை எதுவுமில்லை'],
-    },
-  },
-  Q006: {
-    text: {
-      en: 'Do you have any existing medical conditions that have been diagnosed before?',
-      ta: 'முன்பு கண்டறியப்பட்ட ஏதேனும் மருத்துவ நிலைகள் உங்களுக்கு உள்ளதா?',
-    },
-  },
-  Q007: {
-    text: {
-      en: 'Are you currently taking any medications — including prescription tablets, over-the-counter medicines, vitamins, or herbal supplements?',
-      ta: 'நீங்கள் தற்போது ஏதேனும் மருந்துகள் எடுக்கிறீர்களா — மருந்துச்சீட்டு மாத்திரைகள், மருந்துச்சீட்டு இல்லாத மருந்துகள், வைட்டமின்கள் அல்லது மூலிகை சப்ளிமெண்ட்ஸ் உட்பட?',
-    },
-  },
-  Q008: {
-    text: {
-      en: 'Do you have any known allergies to medicines or food?',
-      ta: 'மருந்துகள் அல்லது உணவுக்கு ஏதேனும் ஒவ்வாமை உங்களுக்கு உள்ளதா?',
-    },
-    options: {
-      en: ['No known allergies', 'Allergy to medicines', 'Food allergy', 'Both medicine and food allergies'],
-      ta: ['ஒவ்வாமை எதுவும் இல்லை', 'மருந்துகளுக்கு ஒவ்வாமை', 'உணவு ஒவ்வாமை', 'மருந்து மற்றும் உணவு இரண்டிற்கும் ஒவ்வாமை'],
-    },
-  },
-  Q009: {
-    text: {
-      en: 'Any family member with heart disease, diabetes, cancer, kidney disease, or similar serious illness?',
-      ta: 'குடும்பத்தில் இதய நோய், நீரிழிவு, புற்றுநோய், சிறுநீரக நோய் அல்லது இதுபோன்ற கடுமையான நோய் உள்ளவர் யாரேனும் உள்ளனரா?',
-    },
-  },
-  Q010: {
-    text: {
-      en: 'How would you describe your lifestyle?',
-      ta: 'உங்கள் வாழ்க்கை முறையை எப்படி விவரிப்பீர்கள்?',
-    },
-    options: {
-      en: ['Mostly sedentary (desk job, minimal exercise)', 'Light activity (walking)', 'Moderately active (exercise 2–3x/week)', 'Very active (daily exercise or manual work)'],
-      ta: ['பெரும்பாலும் உடற்பயிற்சி இல்லாதது (டெஸ்க் வேலை)', 'இலேசான செயல்பாடு (நடைபயிற்சி)', 'மிதமான செயல்பாடு (வாரம் 2–3 முறை)', 'மிகவும் சுறுசுறுப்பானது (தினசரி உடற்பயிற்சி)'],
-    },
-  },
-  Q011: {
-    text: {
-      en: 'How are your sleep patterns?',
-      ta: 'உங்கள் தூக்க முறை எப்படி உள்ளது?',
-    },
-    options: {
-      en: ['Good — 7–8 hours, restful', 'Short — under 6 hours', 'Disrupted or broken sleep', 'Excessive — more than 9 hours'],
-      ta: ['நல்லது — 7–8 மணி நேரம்', 'குறைவு — 6 மணி நேரத்திற்கும் குறைவு', 'இடையூறான தூக்கம்', 'அதிகமானது — 9 மணி நேரத்திற்கும் மேல்'],
-    },
-  },
-  Q012: {
-    text: {
-      en: "Finally — is there anything important you want your doctor to know that you haven't mentioned yet?",
-      ta: 'இறுதியாக — உங்கள் மருத்துவர் தெரிந்துகொள்ள வேண்டிய முக்கியமான ஏதேனும் இதுவரை குறிப்பிடாதவை உள்ளதா?',
-    },
-  },
-};
-
-export function questionText(questionId: string, lang: LangCode, fallback: string): string {
-  const entry = QUESTION_I18N[questionId];
-  return entry?.text[lang] ?? LOCALE_BUNDLES[lang]?.questions[questionId]?.text ?? entry?.text.en ?? fallback;
-}
-
-export function questionOptions(questionId: string, lang: LangCode, fallback: string[]): string[] {
-  const entry = QUESTION_I18N[questionId];
-  return entry?.options?.[lang] ?? LOCALE_BUNDLES[lang]?.questions[questionId]?.options ?? entry?.options?.en ?? fallback;
 }

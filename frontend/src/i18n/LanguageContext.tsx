@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { LANGUAGES, translate, questionText, questionOptions, type LangCode } from './translations';
+import { LANGUAGES, translate, type LangCode } from './translations';
 
 interface LanguageContextValue {
   lang: LangCode;
@@ -7,8 +7,6 @@ interface LanguageContextValue {
   speechLang: string;
   dir: 'ltr' | 'rtl';
   t: (key: string, vars?: Record<string, string | number>) => string;
-  qText: (questionId: string, fallback: string) => string;
-  qOptions: (questionId: string, fallback: string[]) => string[];
 }
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
@@ -45,8 +43,6 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       speechLang: meta.speechLang,
       dir: meta.dir,
       t: (key, vars) => translate(key, lang, vars),
-      qText: (questionId, fallback) => questionText(questionId, lang, fallback),
-      qOptions: (questionId, fallback) => questionOptions(questionId, lang, fallback),
     };
   }, [lang]);
 

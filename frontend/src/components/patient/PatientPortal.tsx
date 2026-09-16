@@ -1,14 +1,17 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './patient.css';
 import type { Patient, PatientDocument } from '../../types';
-import { MOCK_INTERVIEW_SEQUENCE } from '../../data/questionBank';
+import {
+  INTAKE_QUESTIONS, SKIPPED, buildIntakeRecord, formatMeasurements, nextQuestionIndex, questionOptions,
+  questionText, sectionTitle, visibleQuestionCount, type Answers,
+} from '../../data/dashavidhaQuestions';
 import { MOCK_HOSPITALS } from '../../data/mockPatients';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { LANGUAGES } from '../../i18n/translations';
 import { preloadSpeech, useSpeakText, useVoiceRecorder } from '../../hooks/useSpeech';
 import confetti from 'canvas-confetti';
 import {
-  CheckCircle2, ArrowRight, ArrowLeft, Mic, MicOff, Send,
+  CheckCircle2, ArrowRight, ArrowLeft, Mic, MicOff, Send, Stethoscope,
   UploadCloud, FileText, Check, ShieldCheck, Sparkles, Volume2, FileCheck2, Building2, Search, MapPin
 } from 'lucide-react';
 
@@ -21,17 +24,8 @@ interface PatientPortalProps {
   onExit: () => void;
 }
 
-interface QuestionItem {
-  id: string;
-  text: string;
-  type: string;
-  options?: string[];
-  field?: string;
-  helperText?: string;
-  category?: string;
-}
-
-const QUESTIONS: QuestionItem[] = MOCK_INTERVIEW_SEQUENCE as unknown as QuestionItem[];
+// How many upcoming questions to fetch audio for ahead of time.
+const SPEECH_LOOKAHEAD = 4;
 
 export const PatientPortal: React.FC<PatientPortalProps> = ({
   patient,
@@ -41,7 +35,7 @@ export const PatientPortal: React.FC<PatientPortalProps> = ({
   onExit,
 }) => {
   const uploadOnly = mode === 'upload';
-  const { t, lang, speechLang, dir, qText, qOptions } = useLanguage();
+  const { t, lang, speechLang, dir } = useLanguage();
   const [currentStep, setCurrentStep] = useState<number>(uploadOnly ? 4 : 1);
   const [hospitalId, setHospitalId] = useState<string>(patient.hospitalId);
   const [hospitalQuery, setHospitalQuery] = useState('');
@@ -55,22 +49,25 @@ export const PatientPortal: React.FC<PatientPortalProps> = ({
     abhaSync: true,
   });
 
-  // Interview state
+  // Interview state. qIndex points into INTAKE_QUESTIONS; `history` holds the
+  // indices actually asked, so "Previous" retraces the adaptive path.
   const [qIndex, setQIndex] = useState<number>(0);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [history, setHistory] = useState<number[]>([]);
+  const [answers, setAnswers] = useState<Answers>({});
   const [currentAnswer, setCurrentAnswer] = useState<string>('');
-  const [multiSelected, setMultiSelected] = useState<string[]>([]);
-  const [sliderValue, setSliderValue] = useState<number>(7);
+  const [multiSelected, setMultiSelected] = useState<number[]>([]);
+  const [heightCm, setHeightCm] = useState('');
+  const [weightKg, setWeightKg] = useState('');
 
   // Upload state
   const [uploadedFiles, setUploadedFiles] = useState<PatientDocument[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const currentQ = QUESTIONS[qIndex] || QUESTIONS[0];
-  const translatedQText = qText(currentQ.id, currentQ.text);
-  const translatedOptions = currentQ.options ? qOptions(currentQ.id, currentQ.options) : undefined;
+  const currentQ = INTAKE_QUESTIONS[qIndex] ?? INTAKE_QUESTIONS[0];
+  const translatedQText = questionText(currentQ, lang);
+  const translatedOptions = currentQ.options ? questionOptions(currentQ, lang) : undefined;
 
-  const { speak, isSpeaking, supported: speechSupported } = useSpeakText(speechLang);
+  const { speak, supported: speechSupported } = useSpeakText(speechLang);
   const { isRecording, toggle: toggleRecording } = useVoiceRecorder(
     speechLang,
     (transcript) => {
@@ -86,12 +83,14 @@ export const PatientPortal: React.FC<PatientPortalProps> = ({
     t('consent.abha.title'), t('consent.abha.desc'),
   ].join('. ');
 
-  // Fetch every question's audio in the background as soon as the portal opens
-  // (and again if the language changes), so each question is spoken instantly.
+  // Fetch audio in the background before it is needed, so each question is spoken
+  // the moment it appears: the consent text and first questions up front, then the
+  // next few questions (including possible follow-ups) as the interview moves on.
   useEffect(() => {
-    preloadSpeech([...QUESTIONS.map((q) => qText(q.id, q.text)), consentReadAloudText], speechLang);
+    const upcoming = INTAKE_QUESTIONS.slice(qIndex, qIndex + 1 + SPEECH_LOOKAHEAD).map((q) => questionText(q, lang));
+    preloadSpeech(currentStep < 3 ? [consentReadAloudText, ...upcoming] : upcoming, speechLang);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lang, speechLang]);
+  }, [lang, speechLang, qIndex, currentStep]);
 
   // Read each question aloud automatically as it appears (kiosk-friendly for low-literacy users).
   useEffect(() => {
@@ -101,26 +100,55 @@ export const PatientPortal: React.FC<PatientPortalProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [qIndex, currentStep, lang, showPostInterviewChoice]);
 
-  const progressPct = Math.round((qIndex / QUESTIONS.length) * 100);
+  const questionNumber = history.length + 1;
+  const questionTotal = Math.max(questionNumber, visibleQuestionCount(answers));
+  const progressPct = Math.min(100, Math.round((history.length / questionTotal) * 100));
 
-  const goToNextQuestion = () => {
-    if (qIndex < QUESTIONS.length - 1) {
-      setQIndex((prev) => prev + 1);
-      setCurrentAnswer('');
-      setMultiSelected([]);
-    } else {
+  const resetInputs = () => {
+    setCurrentAnswer('');
+    setMultiSelected([]);
+    setHeightCm('');
+    setWeightKg('');
+  };
+
+  // Records the answer and moves to the next question that applies given all answers so far.
+  const handleAnswer = (value: string | string[]) => {
+    const updated: Answers = { ...answers, [currentQ.id]: value };
+    setAnswers(updated);
+    resetInputs();
+    const next = nextQuestionIndex(qIndex, updated);
+    if (next === -1) {
       setShowPostInterviewChoice(true);
+      return;
     }
+    setHistory((prev) => [...prev, qIndex]);
+    setQIndex(next);
   };
 
-  const handleAnswer = (value: string) => {
-    setAnswers((prev) => ({ ...prev, [currentQ.field || currentQ.id]: value }));
-    goToNextQuestion();
+  const handlePrevious = () => {
+    const prev = history[history.length - 1];
+    if (prev === undefined) return;
+    setHistory((h) => h.slice(0, -1));
+    resetInputs();
+    setQIndex(prev);
   };
 
-  const handleMultiToggle = (opt: string) => {
-    setMultiSelected((prev) => (prev.includes(opt) ? prev.filter((o) => o !== opt) : [...prev, opt]));
+  // Choice answers are stored as the English option so branching and the doctor's view are language-independent.
+  const englishOption = (i: number) => currentQ.options?.en[i] ?? '';
+
+  const handleMultiToggle = (i: number) => {
+    const exclusive = /^(None of these|No unusual bleeding|Nothing has changed)$/;
+    setMultiSelected((prev) => {
+      if (prev.includes(i)) return prev.filter((o) => o !== i);
+      // "None" options can't be combined with anything else.
+      if (exclusive.test(englishOption(i))) return [i];
+      return [...prev.filter((o) => !exclusive.test(englishOption(o))), i];
+    });
   };
+
+  const heightNum = Number(heightCm);
+  const weightNum = Number(weightKg);
+  const measurementsValid = heightNum >= 50 && heightNum <= 250 && weightNum >= 2 && weightNum <= 300;
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -158,7 +186,7 @@ export const PatientPortal: React.FC<PatientPortalProps> = ({
 
   const buildUpdatedPatient = (): Patient => {
     const newTimelineEntries: Patient['timeline'] = [
-      { date: today, event: `AI health intake interview completed via patient portal (${selectedHospital?.name ?? 'hospital'})`, type: 'intake' },
+      { date: today, event: `Intake interview with Dashavidha assessment completed (${selectedHospital?.name ?? 'hospital'})`, type: 'intake' },
     ];
     if (uploadedFiles.length > 0) {
       newTimelineEntries.push({ date: today, event: `${uploadedFiles.length} diagnostic report(s) uploaded and OCR-processed`, type: 'document' });
@@ -167,7 +195,9 @@ export const PatientPortal: React.FC<PatientPortalProps> = ({
       ...patient,
       language: LANGUAGES.find((l) => l.code === lang)?.name || patient.language,
       hospitalId,
-      chiefComplaint: answers['chief_complaint'] || patient.chiefComplaint,
+      chiefComplaint:
+        typeof answers.C1 === 'string' && answers.C1 !== SKIPPED ? answers.C1 : patient.chiefComplaint,
+      intake: buildIntakeRecord(answers, LANGUAGES.find((l) => l.code === lang)?.name ?? lang, today),
       lastVisit: today,
       documents: [...uploadedFiles, ...patient.documents],
       timeline: [...newTimelineEntries, ...patient.timeline],
@@ -386,33 +416,39 @@ export const PatientPortal: React.FC<PatientPortalProps> = ({
         </div>
       )}
 
-      {/* STEP 3: INTERACTIVE AI HEALTH INTERVIEW */}
+      {/* STEP 3: ADAPTIVE HEALTH INTERVIEW (anaemia pathway + Dashavidha Pariksha) */}
       {currentStep === 3 && !showPostInterviewChoice && (
         <div className="step-content-card">
           <div className="step-header">
-            <h3 className="step-title">{t('interview.questionOf', { n: qIndex + 1, total: QUESTIONS.length })}</h3>
+            <h3 className="step-title">{t('interview.questionOf', { n: questionNumber, total: questionTotal })}</h3>
             <p className="step-desc">{t('interview.desc')}</p>
           </div>
 
-          {/* Progress bar */}
-          <div className="interview-progress-track">
+          <div
+            className="interview-progress-track"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progressPct}
+            aria-label={t('interview.progress', { pct: progressPct })}
+          >
             <div className="interview-progress-fill" style={{ width: `${progressPct}%` }} />
           </div>
           <div className="interview-progress-label">{t('interview.progress', { pct: progressPct })}</div>
 
           <div className="interview-box">
             <div className="interview-ai-header">
-              <div className="ai-avatar-circle">🩺</div>
+              <div className="ai-avatar-circle" aria-hidden="true">
+                <Stethoscope size={20} />
+              </div>
               <div className="ai-meta">
                 <h4>{t('interview.badge')}</h4>
-                <span>{currentQ.category || t('interview.generalCategory')}</span>
+                <span>{sectionTitle(currentQ.section, lang)}</span>
               </div>
             </div>
 
-            {/* Question Bubble */}
             <div className="question-bubble">
-              <div className="question-text">{translatedQText}</div>
-              {currentQ.helperText && <div className="question-helper">💡 {currentQ.helperText}</div>}
+              <div className="question-text" aria-live="polite">{translatedQText}</div>
               {speechSupported && (
                 <div className="question-voice-actions">
                   <button className="voice-action-chip" onClick={() => speak(translatedQText)}>
@@ -423,11 +459,11 @@ export const PatientPortal: React.FC<PatientPortalProps> = ({
               )}
             </div>
 
-            {/* Response Type: Multiple Choice Options */}
+            {/* Single choice */}
             {currentQ.type === 'mcq' && translatedOptions && (
               <div className="options-grid">
-                {translatedOptions.map((opt: string, i: number) => (
-                  <button key={i} className="option-btn" onClick={() => handleAnswer(opt)}>
+                {translatedOptions.map((opt, i) => (
+                  <button key={`${currentQ.id}-${i}`} className="option-btn" onClick={() => handleAnswer(englishOption(i))}>
                     <span>{opt}</span>
                     <ArrowRight size={15} style={{ opacity: 0.6 }} />
                   </button>
@@ -435,57 +471,31 @@ export const PatientPortal: React.FC<PatientPortalProps> = ({
               </div>
             )}
 
-            {/* Response Type: Severity Scale Slider */}
-            {currentQ.type === 'scale' && (
-              <div className="scale-container">
-                <div className="scale-value-display">
-                  <span className="scale-num">{sliderValue}</span>
-                  <span style={{ fontSize: '1rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>/ 10</span>
-                </div>
-                <input
-                  type="range"
-                  min={1}
-                  max={10}
-                  value={sliderValue}
-                  onChange={(e) => setSliderValue(Number(e.target.value))}
-                  className="scale-slider"
-                />
-                <div className="scale-labels">
-                  <span>1</span>
-                  <span>5</span>
-                  <span>10</span>
-                </div>
-                <div style={{ marginTop: '1.25rem', textAlign: 'center' }}>
-                  <button className="btn-primary" onClick={() => handleAnswer(`Severity ${sliderValue}/10`)}>
-                    {t('interview.confirmSeverity')} ({sliderValue}/10)
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Response Type: Multi-select (checkboxes, several options may be chosen) */}
+            {/* Multi-select */}
             {currentQ.type === 'multi_select' && translatedOptions && (
               <div>
                 <p className="multi-select-hint">{t('interview.selectAllApply')}</p>
-                <div className="options-grid">
-                  {translatedOptions.map((opt: string, i: number) => (
-                    <button
-                      key={i}
-                      className={`option-btn multi ${multiSelected.includes(opt) ? 'selected' : ''}`}
-                      onClick={() => handleMultiToggle(opt)}
-                    >
-                      <span className={`multi-checkbox ${multiSelected.includes(opt) ? 'checked' : ''}`}>
-                        {multiSelected.includes(opt) && <Check size={12} />}
-                      </span>
-                      <span>{opt}</span>
-                    </button>
-                  ))}
+                <div className="options-grid" role="group" aria-label={translatedQText}>
+                  {translatedOptions.map((opt, i) => {
+                    const on = multiSelected.includes(i);
+                    return (
+                      <button
+                        key={`${currentQ.id}-${i}`}
+                        className={`option-btn multi ${on ? 'selected' : ''}`}
+                        onClick={() => handleMultiToggle(i)}
+                        aria-pressed={on}
+                      >
+                        <span className={`multi-checkbox ${on ? 'checked' : ''}`}>{on && <Check size={12} />}</span>
+                        <span>{opt}</span>
+                      </button>
+                    );
+                  })}
                 </div>
                 <div style={{ marginTop: '1.25rem', textAlign: 'center' }}>
                   <button
                     className="btn-primary"
                     disabled={multiSelected.length === 0}
-                    onClick={() => handleAnswer(multiSelected.join(', '))}
+                    onClick={() => handleAnswer([...multiSelected].sort((a, b) => a - b).map(englishOption))}
                   >
                     <span>{t('interview.confirmSelection')}</span>
                     <ArrowRight size={16} />
@@ -494,12 +504,60 @@ export const PatientPortal: React.FC<PatientPortalProps> = ({
               </div>
             )}
 
-            {/* Response Type: Free Text / Voice */}
+            {/* Height and weight (Pramana) */}
+            {currentQ.type === 'measurements' && (
+              <form
+                className="measure-form"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (measurementsValid) handleAnswer(formatMeasurements(heightNum, weightNum));
+                }}
+              >
+                <div className="measure-fields">
+                  <label className="measure-field">
+                    <span>{t('interview.height')}</span>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min={50}
+                      max={250}
+                      value={heightCm}
+                      onChange={(e) => setHeightCm(e.target.value)}
+                      placeholder="160"
+                    />
+                  </label>
+                  <label className="measure-field">
+                    <span>{t('interview.weight')}</span>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min={2}
+                      max={300}
+                      value={weightKg}
+                      onChange={(e) => setWeightKg(e.target.value)}
+                      placeholder="60"
+                    />
+                  </label>
+                </div>
+                {heightCm && weightKg && !measurementsValid && (
+                  <p className="measure-error" role="alert">{t('interview.measureInvalid')}</p>
+                )}
+                <div style={{ marginTop: '1.25rem', textAlign: 'center' }}>
+                  <button type="submit" className="btn-primary" disabled={!measurementsValid}>
+                    <span>{t('action.continue')}</span>
+                    <ArrowRight size={16} />
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Free text / voice */}
             {currentQ.type === 'text' && (
               <div className="voice-text-bar">
                 <button
                   className={`voice-mic-btn ${isRecording ? 'recording' : ''}`}
                   onClick={toggleRecording}
+                  aria-label={isRecording ? t('interview.recording') : t('interview.record')}
                   title={isRecording ? t('interview.recording') : t('interview.record')}
                 >
                   {isRecording ? <MicOff size={18} /> : <Mic size={18} />}
@@ -507,20 +565,20 @@ export const PatientPortal: React.FC<PatientPortalProps> = ({
                 <input
                   type="text"
                   className="voice-input-field"
+                  aria-label={translatedQText}
                   placeholder={isRecording ? t('interview.recording') : t('interview.typeOrSpeak')}
                   value={currentAnswer}
                   onChange={(e) => setCurrentAnswer(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' && currentAnswer.trim()) {
-                      handleAnswer(currentAnswer);
-                    }
+                    if (e.key === 'Enter' && currentAnswer.trim()) handleAnswer(currentAnswer.trim());
                   }}
                 />
                 <button
                   className="btn-primary"
                   style={{ padding: '0.5rem 0.9rem' }}
                   disabled={!currentAnswer.trim()}
-                  onClick={() => handleAnswer(currentAnswer)}
+                  onClick={() => handleAnswer(currentAnswer.trim())}
+                  aria-label={t('action.continue')}
                 >
                   <Send size={15} />
                 </button>
@@ -529,15 +587,11 @@ export const PatientPortal: React.FC<PatientPortalProps> = ({
           </div>
 
           <div className="step-actions">
-            <button
-              className="btn-secondary"
-              disabled={qIndex === 0}
-              onClick={() => setQIndex((prev) => Math.max(0, prev - 1))}
-            >
+            <button className="btn-secondary" disabled={history.length === 0} onClick={handlePrevious}>
               <ArrowLeft size={16} />
               <span>{t('interview.previous')}</span>
             </button>
-            <button className="btn-accent" onClick={() => handleAnswer('Patient skipped or not applicable')}>
+            <button className="btn-accent" onClick={() => handleAnswer(SKIPPED)}>
               <span>{t('action.skip')}</span>
               <ArrowRight size={16} />
             </button>

@@ -7,9 +7,12 @@ import { DoctorDashboard } from './components/doctor/DoctorDashboard';
 import { DoctorLogin } from './components/doctor/DoctorLogin';
 import { Login } from './components/patient/Login';
 import { MOCK_PATIENTS, MOCK_DOCTORS, MOCK_HOSPITALS } from './data/mockPatients';
+import { DEMO_PATIENTS, buildConsultationRegister } from './data/opdRegister';
+import { withDemoRecords } from './data/demoRecords';
 import { loadPatientDb, savePatientDb, newPatientId } from './services/db';
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
 import type { Doctor, Patient, Prescription, Session } from './types';
+import { Landmark, Lock, Phone } from 'lucide-react';
 
 type AuthMethod = 'phone' | 'aadhaar' | 'abha' | 'biometric';
 
@@ -18,6 +21,9 @@ type AuthMethod = 'phone' | 'aadhaar' | 'abha' | 'biometric';
 type PublicScreen = 'LANDING' | 'PATIENT_LOGIN' | 'DOCTOR_LOGIN';
 
 const DOCTORS = MOCK_DOCTORS as Doctor[];
+
+// Seed records: the original demo patients plus each hospital's OPD register patients.
+const SEED_PATIENTS: Patient[] = [...(MOCK_PATIENTS as unknown as Patient[]), ...DEMO_PATIENTS];
 
 function digitsOf(value: string): string {
   return value.replace(/\D/g, '');
@@ -33,7 +39,7 @@ function buildRegisteredPatient(identity: { method: AuthMethod; value: string })
     age: 0,
     gender: '—',
     bloodGroup: '—',
-    avatar: '🧑',
+    avatar: '',
     phone: identity.method === 'phone' ? identity.value : '',
     aadhaar: identity.method === 'aadhaar' ? digitsOf(identity.value) : undefined,
     abha: identity.method === 'abha' ? identity.value : `ABHA-PENDING-${digitsOf(identity.value).slice(-4) || '0000'}`,
@@ -72,16 +78,16 @@ function findExistingPatient(patients: Patient[], identity: { method: AuthMethod
 
 function AppShell() {
   const { dir } = useLanguage();
-  const [patients, setPatients] = useState<Patient[]>(() => loadPatientDb(MOCK_PATIENTS as unknown as Patient[]));
+  const [patients, setPatients] = useState<Patient[]>(() =>
+    // Demo intake interviews and past history are merged in, including into records restored from storage.
+    loadPatientDb(SEED_PATIENTS).map(withDemoRecords)
+  );
   const [screen, setScreen] = useState<PublicScreen>('LANDING');
   const [session, setSession] = useState<Session | null>(null);
 
   // Patient-side view state
   const [patientView, setPatientView] = useState<'HOME' | 'CONSULTATION'>('HOME');
   const [justSubmitted, setJustSubmitted] = useState(false);
-
-  // Doctor-side view state
-  const [activePatientId, setActivePatientId] = useState<string | null>(null);
 
   useEffect(() => {
     savePatientDb(patients);
@@ -94,14 +100,13 @@ function AppShell() {
     () => (sessionDoctor ? patients.filter((p) => p.hospitalId === sessionDoctor.hospitalId) : []),
     [patients, sessionDoctor]
   );
-  const activePatient = hospitalPatients.find((p) => p.id === activePatientId) ?? hospitalPatients[0];
+  const consultationRegister = useMemo(() => buildConsultationRegister(hospitalPatients), [hospitalPatients]);
 
   const logout = () => {
     setSession(null);
     setScreen('LANDING');
     setPatientView('HOME');
     setJustSubmitted(false);
-    setActivePatientId(null);
   };
 
   const handlePatientAuthenticated = (identity: { method: AuthMethod; value: string; tab: 'login' | 'register' }): boolean => {
@@ -173,7 +178,7 @@ function AppShell() {
     }
 
     if (sessionDoctor) {
-      if (!activePatient) {
+      if (hospitalPatients.length === 0) {
         return (
           <div className="doctor-empty-state" dir="ltr">
             <h3>No patients at {signedIn?.detail} yet</h3>
@@ -185,8 +190,7 @@ function AppShell() {
         <DoctorDashboard
           doctor={sessionDoctor}
           patients={hospitalPatients}
-          activePatient={activePatient}
-          onSelectPatient={(p) => setActivePatientId(p.id)}
+          register={consultationRegister}
           onIssuePrescription={handleIssuePrescription}
         />
       );
@@ -218,7 +222,7 @@ function AppShell() {
         }}
       />
 
-      <div className="main-viewport" dir={sessionDoctor ? 'ltr' : dir}>
+      <div className="main-viewport" id="main-content" tabIndex={-1} dir={sessionDoctor ? 'ltr' : dir}>
         {renderContent()}
       </div>
 
@@ -228,9 +232,9 @@ function AppShell() {
             <strong>MediMate</strong> — National Digital Health Intake Service, operated under the Ayushman Bharat Digital Mission (ABDM).
           </div>
           <div className="gov-footer-links">
-            <span>🔒 ABDM Compliant</span>
-            <span>🏛️ Ministry of Health &amp; Family Welfare</span>
-            <span>☎ Helpline: 1800-11-4477</span>
+            <span><Lock size={14} aria-hidden="true" /> ABDM Compliant</span>
+            <span><Landmark size={14} aria-hidden="true" /> Ministry of Health &amp; Family Welfare</span>
+            <span><Phone size={14} aria-hidden="true" /> Helpline: 1800-11-4477</span>
           </div>
         </div>
       </footer>

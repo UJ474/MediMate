@@ -389,6 +389,7 @@
   align-items: center;
   justify-content: center;
   font-size: 1.4rem;
+  color: #FFFFFF;
   box-shadow: var(--shadow-sm);
 }
 
@@ -875,4 +876,46 @@
 [dir='rtl'] .step-actions svg,
 [dir='rtl'] .option-btn svg {
   transform: scaleX(-1);
+}
+
+/* Height / weight entry (Pramana) */
+.measure-form {
+  margin-top: 0.5rem;
+}
+
+.measure-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.measure-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.measure-field input {
+  padding: 0.75rem 0.9rem;
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.measure-field input:focus {
+  outline: none;
+  border-color: var(--color-primary-light);
+  box-shadow: 0 0 0 3px var(--color-primary-pale);
+}
+
+.measure-error {
+  margin-top: 0.6rem;
+  font-size: 0.82rem;
+  color: #B91C1C;
 }

@@ -93,6 +93,27 @@ export interface Patient {
   documents: PatientDocument[];
   // Prescriptions issued by a doctor after sign-off — the only clinical output the patient can see.
   prescriptions: Prescription[];
+  // Latest structured intake interview (anaemia pathway + Dashavidha Pariksha), if the patient has completed one.
+  intake?: IntakeRecord;
+}
+
+export interface IntakeAnswer {
+  id: string;
+  section: string;
+  // Dashavidha examination this answer informs, e.g. 'Ahara Shakti'.
+  pariksha?: string;
+  // Question as worded in English for the practitioner.
+  question: string;
+  // Choice answers are the English option; free-text answers are in the patient's own words.
+  answer: string;
+}
+
+export interface IntakeRecord {
+  completedOn: string;
+  language: string;
+  answers: IntakeAnswer[];
+  // Findings the system does not interpret and that need the practitioner's attention.
+  flags: string[];
 }
 
 export interface PatientDocument {
