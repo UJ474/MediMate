@@ -1,0 +1,491 @@
+/* Patient home — app-style dashboard: profile header, banner carousel,
+   quick-action tiles and colour-coded record sections. */
+
+.phome {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  --tone-saffron: #E86A1C;
+  --tone-saffron-pale: #FEF3EA;
+  --tone-green: #138808;
+  --tone-green-pale: #EAF6E8;
+  --tone-blue: #114B8F;
+  --tone-blue-pale: #E9F1FB;
+  --tone-purple: #6D28D9;
+  --tone-purple-pale: #F1EBFD;
+}
+
+.phome .tone-saffron { --tone: var(--tone-saffron); --tone-pale: var(--tone-saffron-pale); }
+.phome .tone-green { --tone: var(--tone-green); --tone-pale: var(--tone-green-pale); }
+.phome .tone-blue { --tone: var(--tone-blue); --tone-pale: var(--tone-blue-pale); }
+.phome .tone-purple { --tone: var(--tone-purple); --tone-pale: var(--tone-purple-pale); }
+
+/* ---------- Profile header ---------- */
+.phome-profile {
+  position: relative;
+  overflow: hidden;
+  padding: 1.5rem;
+  border-radius: 18px;
+  color: #FFFFFF;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255, 153, 51, 0.35), transparent 45%),
+    linear-gradient(135deg, #0B2447 0%, #114B8F 70%, #1D63B3 100%);
+  box-shadow: 0 10px 24px -12px rgba(11, 36, 71, 0.55);
+}
+
+.phome-profile-main {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.phome-avatar {
+  flex-shrink: 0;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.phome-profile-text h2 {
+  color: #FFFFFF;
+  font-size: 1.4rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.phome-profile-text p {
+  font-size: 0.85rem;
+  color: #CBD5E1;
+  margin-top: 0.2rem;
+}
+
+.phome-profile-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.phome-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.phome-chip code {
+  font-family: inherit;
+  color: #FFD2A6;
+}
+
+.phome-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 1.25rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.phome-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+}
+
+.phome-stat + .phome-stat {
+  border-inline-start: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.phome-stat-num {
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.phome-stat-date {
+  font-size: 0.95rem;
+  line-height: 1.9;
+}
+
+.phome-stat-label {
+  font-size: 0.72rem;
+  color: #CBD5E1;
+}
+
+/* ---------- Banner carousel ---------- */
+.phome-carousel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.phome-carousel-track {
+  display: flex;
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.phome-banner {
+  flex: 0 0 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 150px;
+  padding: 1.25rem 1.5rem 2rem;
+  color: #FFFFFF;
+}
+
+.phome-banner.tone-saffron { background: linear-gradient(120deg, #C2410C 0%, #F97316 100%); }
+.phome-banner.tone-green { background: linear-gradient(120deg, #0F6B0A 0%, #22A31A 100%); }
+.phome-banner.tone-blue { background: linear-gradient(120deg, #0B2447 0%, #1D63B3 100%); }
+
+.phome-banner-text h3 {
+  color: #FFFFFF;
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin-bottom: 0.3rem;
+}
+
+.phome-banner-text p {
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.88);
+  max-width: 520px;
+}
+
+.phome-banner-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.8rem;
+  padding: 0.45rem 0.95rem;
+  border: none;
+  border-radius: var(--radius-full);
+  background: #FFFFFF;
+  color: var(--color-primary-navy);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.phome-banner-art {
+  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 0 0 12px rgba(255, 255, 255, 0.07);
+}
+
+.phome-carousel-dots {
+  position: absolute;
+  bottom: 0.7rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.4rem;
+}
+
+.phome-dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: width var(--transition-normal), background var(--transition-normal);
+}
+
+.phome-dot.active {
+  width: 20px;
+  background: #FFFFFF;
+}
+
+/* ---------- Quick actions ---------- */
+.phome-quick {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+}
+
+.phome-quick-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.25rem;
+  background: none;
+  border: none;
+  border-radius: 12px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.phome-quick-tile:hover {
+  background: var(--color-surface-subtle);
+}
+
+.phome-quick-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--tone-pale);
+  color: var(--tone);
+  transition: transform var(--transition-fast);
+}
+
+.phome-quick-tile:hover .phome-quick-icon {
+  transform: translateY(-2px);
+}
+
+.phome-quick-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* ---------- Record sections ---------- */
+.phome-section {
+  scroll-margin-top: 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-top: 4px solid var(--tone);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.phome-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.9rem 1.25rem;
+  background: var(--tone-pale);
+}
+
+.phome-section-header h3 {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-primary-navy);
+}
+
+.phome-section-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--tone);
+  color: #FFFFFF;
+}
+
+.phome-count {
+  min-width: 28px;
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--tone);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.phome-section-body {
+  padding: 1.25rem;
+}
+
+.phome-empty {
+  padding: 1.25rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-subtle);
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+}
+
+.phome .rx-card {
+  border-radius: 12px;
+  border-inline-start-color: var(--tone-green);
+}
+
+.phome-date-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  background: var(--tone-green-pale);
+  color: var(--tone-green);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.phome-doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.75rem;
+}
+
+.phome-doc-card {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+}
+
+.phome-doc-icon {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--tone-blue-pale);
+  color: var(--tone-blue);
+}
+
+.phome-doc-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.phome-doc-text .home-doc-name {
+  overflow-wrap: anywhere;
+}
+
+/* Timeline */
+.phome-timeline {
+  list-style: none;
+  position: relative;
+  padding-inline-start: 1.5rem;
+}
+
+.phome-timeline::before {
+  content: '';
+  position: absolute;
+  top: 0.4rem;
+  bottom: 0.4rem;
+  inset-inline-start: 0.4rem;
+  width: 2px;
+  background: var(--color-border);
+}
+
+.phome-timeline-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0 0 1.1rem;
+  --dot: var(--color-primary-mid);
+}
+
+.phome-timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.phome-timeline-item.type-diagnosis { --dot: #DC2626; }
+.phome-timeline-item.type-alert { --dot: #F59E0B; }
+.phome-timeline-item.type-medication { --dot: var(--tone-green); }
+.phome-timeline-item.type-lab,
+.phome-timeline-item.type-report,
+.phome-timeline-item.type-document { --dot: var(--tone-blue); }
+.phome-timeline-item.type-prescription { --dot: var(--tone-green); }
+.phome-timeline-item.type-intake,
+.phome-timeline-item.type-registration { --dot: var(--tone-purple); }
+
+.phome-timeline-dot {
+  position: absolute;
+  top: 0.3rem;
+  inset-inline-start: calc(-1.5rem + 0.4rem - 5px);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--dot);
+  box-shadow: 0 0 0 3px var(--color-surface);
+}
+
+.phome-timeline-date {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--dot);
+}
+
+.phome-timeline-event {
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+  line-height: 1.45;
+}
+
+@media (max-width: 640px) {
+  .phome-quick {
+    gap: 0.25rem;
+    padding: 0.75rem 0.5rem;
+  }
+  .phome-quick-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+  }
+  .phome-quick-label {
+    font-size: 0.7rem;
+  }
+  .phome-banner-art {
+    width: 64px;
+    height: 64px;
+  }
+  .phome-banner-art svg {
+    width: 30px;
+    height: 30px;
+  }
+  .phome-stat-num {
+    font-size: 1.1rem;
+  }
+  .phome-stat-date {
+    font-size: 0.78rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phome-carousel-track {
+    transition: none;
+  }
+}
