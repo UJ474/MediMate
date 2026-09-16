@@ -14,8 +14,9 @@ interface PatientHomeProps {
   justSubmitted: boolean;
   reportsSaved?: boolean;
   onStartConsultation: () => void;
-  onUploadReports: () => void;
+  // onUploadReports: () => void;
 }
+
 
 type SectionKey = 'prescriptions' | 'documents' | 'history';
 

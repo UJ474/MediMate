@@ -167,6 +167,7 @@ function AppShell() {
             setJustSubmitted(false);
             setPatientView('CONSULTATION');
           }}
+          // onUploadReports={onUploadReports}
         />
       );
     }
