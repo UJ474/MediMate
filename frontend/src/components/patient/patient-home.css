@@ -146,7 +146,8 @@
   justify-content: space-between;
   gap: 1rem;
   min-height: 150px;
-  padding: 1.25rem 1.5rem 2rem;
+  /* Extra side padding leaves room for the prev/next arrows. */
+  padding: 1.25rem 2.9rem 2rem;
   color: #FFFFFF;
 }
 
@@ -195,6 +196,32 @@
   background: rgba(255, 255, 255, 0.16);
   box-shadow: 0 0 0 12px rgba(255, 255, 255, 0.07);
 }
+
+.phome-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.28);
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: background var(--transition-normal), border-color var(--transition-normal);
+}
+
+.phome-carousel-arrow:hover {
+  background: rgba(15, 23, 42, 0.5);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.phome-carousel-arrow.prev { left: 0.5rem; }
+.phome-carousel-arrow.next { right: 0.5rem; }
 
 .phome-carousel-dots {
   position: absolute;
@@ -468,10 +495,19 @@
   .phome-quick-label {
     font-size: 0.7rem;
   }
+  .phome-banner {
+    padding: 1.25rem 2.4rem 2rem;
+  }
   .phome-banner-art {
     width: 64px;
     height: 64px;
   }
+  .phome-carousel-arrow {
+    width: 28px;
+    height: 28px;
+  }
+  .phome-carousel-arrow.prev { left: 0.25rem; }
+  .phome-carousel-arrow.next { right: 0.25rem; }
   .phome-banner-art svg {
     width: 30px;
     height: 30px;

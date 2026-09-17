@@ -192,6 +192,8 @@ export const UI: Record<string, Dict> = {
     ta: 'ஒவ்வொரு வருகை, பரிசோதனை, மருந்துச்சீட்டும் உங்கள் கணக்கில் பாதுகாப்பாக சேமிக்கப்படும்.',
   },
   'home.banner3.cta': { en: 'See my history', ta: 'என் வரலாற்றைப் பார்' },
+  'home.banner.prev': { en: 'Previous banner', ta: 'முந்தைய பேனர்' },
+  'home.banner.next': { en: 'Next banner', ta: 'அடுத்த பேனர்' },
   'home.quick.consult': { en: 'New consultation', ta: 'புதிய ஆலோசனை' },
   'home.quick.prescriptions': { en: 'Prescriptions', ta: 'மருந்துச்சீட்டுகள்' },
   'home.quick.reports': { en: 'Reports', ta: 'ரிப்போர்ட்கள்' },

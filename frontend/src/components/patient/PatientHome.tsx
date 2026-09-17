@@ -6,7 +6,7 @@ import { MOCK_HOSPITALS } from '../../data/mockPatients';
 import { useLanguage } from '../../i18n/LanguageContext';
 import {
   FileText, Pill, PlusCircle, CheckCircle2, ClipboardList, History, ShieldCheck,
-  Building2, UploadCloud, MapPinned, ArrowRight, CalendarDays,
+  Building2, UploadCloud, MapPinned, ArrowRight, CalendarDays, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 
 interface PatientHomeProps {
@@ -40,6 +40,10 @@ export const PatientHome: React.FC<PatientHomeProps> = ({ patient, justSubmitted
   ];
   const [bannerIndex, setBannerIndex] = useState(0);
   const [bannerPaused, setBannerPaused] = useState(false);
+
+  // Step the carousel by +1 / -1, wrapping around at either end.
+  const stepBanner = (delta: number) =>
+    setBannerIndex((i) => (i + delta + banners.length) % banners.length);
 
   useEffect(() => {
     if (bannerPaused) return;
@@ -111,6 +115,11 @@ export const PatientHome: React.FC<PatientHomeProps> = ({ patient, justSubmitted
         onMouseLeave={() => setBannerPaused(false)}
         aria-roledescription="carousel"
         dir="ltr"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowLeft') { e.preventDefault(); stepBanner(-1); }
+          if (e.key === 'ArrowRight') { e.preventDefault(); stepBanner(1); }
+        }}
       >
         <div className="phome-carousel-track" style={{ transform: `translateX(-${bannerIndex * 100}%)` }}>
           {banners.map((b, i) => (
@@ -127,6 +136,22 @@ export const PatientHome: React.FC<PatientHomeProps> = ({ patient, justSubmitted
             </div>
           ))}
         </div>
+        <button
+          type="button"
+          className="phome-carousel-arrow prev"
+          onClick={() => stepBanner(-1)}
+          aria-label={t('home.banner.prev')}
+        >
+          <ChevronLeft size={18} />
+        </button>
+        <button
+          type="button"
+          className="phome-carousel-arrow next"
+          onClick={() => stepBanner(1)}
+          aria-label={t('home.banner.next')}
+        >
+          <ChevronRight size={18} />
+        </button>
         <div className="phome-carousel-dots">
           {banners.map((_, i) => (
             <button

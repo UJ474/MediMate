@@ -86,8 +86,9 @@ function AppShell() {
   const [session, setSession] = useState<Session | null>(null);
 
   // Patient-side view state
-  const [patientView, setPatientView] = useState<'HOME' | 'CONSULTATION'>('HOME');
+  const [patientView, setPatientView] = useState<'HOME' | 'CONSULTATION' | 'UPLOAD'>('HOME');
   const [justSubmitted, setJustSubmitted] = useState(false);
+  const [reportsSaved, setReportsSaved] = useState(false);
 
   useEffect(() => {
     savePatientDb(patients);
@@ -107,6 +108,7 @@ function AppShell() {
     setScreen('LANDING');
     setPatientView('HOME');
     setJustSubmitted(false);
+    setReportsSaved(false);
   };
 
   const handlePatientAuthenticated = (identity: { method: AuthMethod; value: string; tab: 'login' | 'register' }): boolean => {
@@ -126,6 +128,14 @@ function AppShell() {
     setPatients((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
     setPatientView('HOME');
     setJustSubmitted(true);
+    setReportsSaved(false);
+  };
+
+  const handleReportsSaved = (updated: Patient) => {
+    setPatients((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+    setPatientView('HOME');
+    setJustSubmitted(false);
+    setReportsSaved(true);
   };
 
   const handleIssuePrescription = (patientId: string, prescription: Prescription) => {
@@ -157,22 +167,33 @@ function AppShell() {
 
   const renderContent = () => {
     if (sessionPatient) {
-      return patientView === 'CONSULTATION' ? (
-        <PatientPortal
-          key={sessionPatient.id}
-          patient={sessionPatient}
-          onConsultationSubmitted={handleConsultationSubmitted}
-          onExit={() => setPatientView('HOME')}
-        />
-      ) : (
+      if (patientView === 'CONSULTATION' || patientView === 'UPLOAD') {
+        return (
+          <PatientPortal
+            key={`${sessionPatient.id}-${patientView}`}
+            patient={sessionPatient}
+            mode={patientView === 'UPLOAD' ? 'upload' : 'consultation'}
+            onConsultationSubmitted={handleConsultationSubmitted}
+            onReportsSaved={handleReportsSaved}
+            onExit={() => setPatientView('HOME')}
+          />
+        );
+      }
+      return (
         <PatientHome
           patient={sessionPatient}
           justSubmitted={justSubmitted}
+          reportsSaved={reportsSaved}
           onStartConsultation={() => {
             setJustSubmitted(false);
+            setReportsSaved(false);
             setPatientView('CONSULTATION');
           }}
-          // onUploadReports={onUploadReports}
+          onUploadReports={() => {
+            setJustSubmitted(false);
+            setReportsSaved(false);
+            setPatientView('UPLOAD');
+          }}
         />
       );
     }
