@@ -44,11 +44,10 @@ export const Landing: React.FC<LandingProps> = ({ onChooseRole }) => {
           </figcaption>
           <a
             className="home-banner-credit"
-            href="https://commons.wikimedia.org/wiki/File:Waiting_Hall_(OPD)_Sir_Sunderlal_Hospital,_Banaras_Hindu_University.png"
             target="_blank"
             rel="noreferrer"
           >
-            Photo: User4edits, CC BY-SA 4.0
+            Ayushman Bharat Digital Mission
           </a>
         </figure>
 
